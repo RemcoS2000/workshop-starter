@@ -1,0 +1,93 @@
+---
+description: Stage, commit with an auto-generated message, then push to the remote
+allowed-tools: Bash(git *)
+disable-model-invocation: true
+---
+
+# Git Commit & Push (Auto)
+
+Stage everything, commit with an auto-generated message (no confirmation), then push to the remote.
+
+## Instructions
+
+### Step 1: Stage Everything
+
+```bash
+git add -A
+```
+
+### Step 2: Generate Commit Message
+
+Review the final diff:
+
+```bash
+git diff --cached
+```
+
+Follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/):
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+```
+
+**Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`
+**Scope:** Affected area (e.g., `app`, `api`, `auth`, `prisma`, `ui`). Omit for cross-cutting changes.
+
+Focus the message on the *why*, not the *what*. Keep the subject line under 70 characters.
+
+### Step 3: Commit (No Confirmation)
+
+Commit directly with the generated message using a HEREDOC:
+
+```bash
+git commit -m "$(cat <<'EOF'
+<type>(<scope>): <subject>
+
+<optional body>
+EOF
+)"
+```
+
+Do not ask for confirmation. Do not show the message and wait. Just commit.
+
+If a pre-commit hook fails, fix the underlying issue, re-stage with `git add -A`, and create a **new** commit (never `--amend`). If the commit ultimately cannot be made, stop. Do not push.
+
+### Step 4: Push
+
+Detect the current branch:
+
+```bash
+git branch --show-current
+```
+
+**If on `main`:** pull with rebase first, then push:
+
+```bash
+git pull --rebase origin main && git push
+```
+
+**If on a feature branch:**
+
+```bash
+git push
+```
+
+If the branch has no upstream yet, use `git push -u origin HEAD` to set it on the first push.
+
+### Step 5: Handle Push Rejections
+
+If the remote rejects the push because it has new commits, stop and ask the user how to proceed (rebase or merge). **Never force push without explicit user permission.** If a force push is clearly needed (e.g., after a rebase the user performed earlier), explain why and ask before running `git push --force-with-lease`.
+
+If a rebase produces conflicts:
+
+1. `git status` to see conflicted files
+2. Resolve each one
+3. `git add <file>` the fixes
+4. `git rebase --continue`
+5. Repeat until clean, then push
+
+### Step 6: Report
+
+After the push succeeds, report the commit message, the branch, and the remote tracking ref (e.g. `origin/feat/foo`).
