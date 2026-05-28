@@ -1,0 +1,2631 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Claude Code Workshop · Codehive × HomeWizard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #2b2d3a;
+        --bg-elev: #33354a;
+        --surface: rgba(255, 255, 255, 0.04);
+        --border: rgba(255, 255, 255, 0.08);
+        --border-strong: rgba(255, 255, 255, 0.14);
+        --text: #c5c8d4;
+        --text-strong: #eae9e9;
+        --muted: #8b8d9b;
+        --dim: #6b6d7d;
+        --accent: #43d3ff;
+        --accent-dim: rgba(67, 211, 255, 0.15);
+        --orange: #ff9b6b;
+        --orange-dim: rgba(255, 155, 107, 0.15);
+        --green: #6cb86c;
+        --green-dim: rgba(108, 184, 108, 0.12);
+
+        --font-sans: "Geist", system-ui, -apple-system, sans-serif;
+        --font-mono: "Geist Mono", "Monaco", "Courier New", monospace;
+
+        --radius: 14px;
+        --radius-sm: 8px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-sans);
+        font-size: 20px;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ---------- Slide container ---------- */
+      .deck {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .slide {
+        position: absolute;
+        inset: 0;
+        padding: 80px 100px;
+        display: none;
+        flex-direction: column;
+        opacity: 0;
+        animation: fadeIn 240ms ease-out;
+      }
+
+      .slide.active {
+        display: flex;
+        opacity: 1;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ---------- Persistent chrome ---------- */
+      .block-label {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--muted);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+
+      .chrome-bottom {
+        position: fixed;
+        bottom: 20px;
+        left: 32px;
+        right: 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        pointer-events: none;
+        z-index: 10;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        opacity: 0.7;
+      }
+
+      .brand-logo {
+        height: 22px;
+        width: auto;
+      }
+
+      .slide-counter {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--dim);
+        letter-spacing: 1px;
+      }
+
+      /* Hide block label on title + closing */
+      body:has(.slide.active.slide--title) .block-label {
+        display: none !important;
+      }
+
+      /* ---------- Slide types ---------- */
+
+      /* Title slide */
+      .slide--title {
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        background: radial-gradient(
+          ellipse at center,
+          rgba(67, 211, 255, 0.08) 0%,
+          transparent 60%
+        );
+      }
+
+      .slide--title .xmark {
+        font-family: var(--font-mono);
+        color: var(--muted);
+        font-size: 16px;
+        margin: 24px 0;
+        letter-spacing: 3px;
+      }
+
+      .slide--title h1 {
+        font-size: 72px;
+        font-weight: 600;
+        color: var(--text-strong);
+        letter-spacing: -1px;
+        margin-bottom: 14px;
+      }
+
+      .slide--title .subtitle {
+        font-size: 24px;
+        color: var(--muted);
+        margin-bottom: 60px;
+        font-weight: 300;
+      }
+
+      .slide--title .partners {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 40px;
+      }
+
+      .slide--title .partners img[alt="Codehive"] {
+        height: 52px;
+      }
+
+      .slide--title .partners img[alt="HomeWizard"] {
+        height: 42px;
+      }
+
+      .slide--title .partners .x {
+        color: var(--accent);
+        font-size: 24px;
+      }
+
+      .slide--title .meta {
+        margin-top: 40px;
+        font-family: var(--font-mono);
+        color: var(--muted);
+        font-size: 14px;
+        letter-spacing: 1px;
+      }
+
+      /* Section divider */
+      .slide--divider {
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+
+      .slide--divider .marker {
+        font-size: 56px;
+        color: var(--accent);
+        margin-bottom: 30px;
+        text-shadow: 0 0 40px rgba(67, 211, 255, 0.4);
+      }
+
+      .slide--divider h2 {
+        font-size: 64px;
+        font-weight: 600;
+        color: var(--text-strong);
+        letter-spacing: -1px;
+        margin-bottom: 30px;
+      }
+
+      .slide--divider .gradient-line {
+        width: 320px;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(67, 211, 255, 0.5),
+          transparent
+        );
+        margin: 20px auto 0;
+      }
+
+      .slide--divider .block-time {
+        margin-top: 36px;
+        font-family: var(--font-mono);
+        color: var(--orange);
+        font-size: 18px;
+        letter-spacing: 2px;
+      }
+
+      /* Content slide */
+      .slide--content {
+        padding-top: 15px;
+      }
+
+      .slide--content h2 {
+        font-size: 48px;
+        font-weight: 600;
+        color: var(--text-strong);
+        margin-bottom: 12px;
+        letter-spacing: -0.5px;
+        text-align: center;
+      }
+
+      .slide--content .lead {
+        font-size: 20px;
+        color: var(--muted);
+        margin-bottom: 32px;
+        font-weight: 300;
+        text-align: center;
+      }
+
+      .slide--content .body {
+        flex: 1;
+        overflow: hidden;
+      }
+
+      /* Glass card, default: vertical stack with title-left / description-right */
+      .card-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: var(--radius);
+        padding: 16px 24px;
+        display: flex;
+        gap: 28px;
+        align-items: flex-start;
+        max-width: 1000px;
+        width: 100%;
+      }
+
+      .card h3 {
+        flex: 0 0 240px;
+        font-size: 17px;
+        color: var(--accent);
+        font-weight: 600;
+        padding-top: 2px;
+        margin: 0;
+      }
+
+      .card > p,
+      .card > ul,
+      .card > div {
+        flex: 1;
+        margin: 0;
+      }
+
+      .card p {
+        font-size: 16px;
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      /* Card variant: stacked (title above content), use for side-by-side cards */
+      .card--stacked {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .card--stacked h3 {
+        flex: initial;
+      }
+
+      /* Modifier: 2-column horizontal grid when vertical stacking would be too tall */
+      .card-grid--2col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        align-items: stretch;
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .card-grid--2col .card {
+        flex-direction: column;
+        gap: 10px;
+        max-width: 600px;
+      }
+
+      /* Opdracht / assignment callout */
+      .callout {
+        margin: 20px auto 0;
+        padding: 14px 20px;
+        border-left: 3px solid var(--accent);
+        background: var(--accent-dim);
+        border-radius: 4px;
+        font-size: 15px;
+        max-width: 1200px;
+      }
+
+      /* Links inside slide content - default blue is unreadable on dark bg */
+      .slide a {
+        color: var(--orange);
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 3px;
+      }
+      .slide a:hover {
+        opacity: 0.85;
+      }
+
+      /* Speaker cue: marks a card / item for live demo during presentation */
+      .demo-badge {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--orange);
+        background: var(--orange-dim);
+        padding: 2px 8px;
+        border-radius: 999px;
+        margin-left: 10px;
+        vertical-align: 2px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .card-grid--2col .card h3 {
+        flex: initial;
+      }
+
+      /* Inline logo/icon in card titles */
+      .card-icon {
+        height: 22px;
+        width: auto;
+        vertical-align: -5px;
+        margin-right: 10px;
+        opacity: 0.92;
+      }
+      .card-icon--lg {
+        height: 28px;
+        vertical-align: -7px;
+      }
+
+      /* Hero screenshot, sits between lead and cards */
+      .hero-shot {
+        display: block;
+        max-width: 900px;
+        width: 100%;
+        height: auto;
+        border-radius: var(--radius);
+        border: 1px solid var(--border-strong);
+        box-shadow: 0 10px 32px rgba(0, 0, 0, 0.4);
+        margin: 0 auto 24px;
+      }
+      .hero-shot--compact {
+        max-width: 720px;
+        margin-bottom: 18px;
+      }
+
+      /* Side-by-side image + content (slide 17, 22, 29) */
+      .split {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        gap: 40px;
+        align-items: center;
+        max-width: 1280px;
+        margin: 0 auto;
+        width: 100%;
+      }
+      .split img {
+        width: 100%;
+        height: auto;
+        border-radius: var(--radius);
+        border: 1px solid var(--border-strong);
+        box-shadow: 0 10px 32px rgba(0, 0, 0, 0.4);
+      }
+      .split--p1 img {
+        border: none;
+        box-shadow: none;
+        max-height: 420px;
+        width: auto;
+        margin: 0 auto;
+        display: block;
+      }
+
+      /* Terminal frame, for CLI demos */
+      .terminal {
+        background: #1b1d26;
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius-sm);
+        padding: 24px 28px;
+        font-family: var(--font-mono);
+        font-size: 16px;
+        line-height: 1.7;
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .terminal .prompt {
+        color: var(--orange);
+      }
+
+      .terminal .output {
+        color: var(--muted);
+      }
+
+      .terminal .cursor::after {
+        content: "▊";
+        color: var(--accent);
+        animation: blink 1s step-end infinite;
+      }
+
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+
+      /* Bullet list */
+      .checks {
+        list-style: none;
+      }
+
+      .checks li {
+        padding: 10px 0 10px 32px;
+        position: relative;
+        font-size: 18px;
+        color: var(--text);
+      }
+
+      .checks li::before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: var(--green);
+        font-weight: 700;
+      }
+
+      /* Tighter checks when inside a card */
+      .card .checks li {
+        padding: 5px 0 5px 26px;
+        font-size: 15px;
+      }
+
+      /* Pauze slide */
+      .slide--pause {
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        background: radial-gradient(
+          ellipse at center,
+          rgba(108, 184, 108, 0.08) 0%,
+          transparent 60%
+        );
+      }
+
+      .slide--pause .icon {
+        font-size: 120px;
+        margin-bottom: 20px;
+      }
+
+      .slide--pause h2 {
+        font-size: 72px;
+        font-weight: 600;
+        color: var(--green);
+        letter-spacing: 4px;
+        margin-bottom: 10px;
+      }
+
+      .slide--pause .duration {
+        font-size: 32px;
+        color: var(--muted);
+        font-family: var(--font-mono);
+        margin-bottom: 40px;
+      }
+
+      .slide--pause .return {
+        font-family: var(--font-mono);
+        font-size: 20px;
+        color: var(--text);
+        border: 1px dashed var(--green-dim);
+        padding: 14px 28px;
+        border-radius: var(--radius-sm);
+        background: var(--green-dim);
+      }
+
+      .slide--pause .hint {
+        margin-top: 30px;
+        font-size: 16px;
+        color: var(--muted);
+      }
+
+      /* Agenda timeline (hergebruik van index.html patroon) */
+      .timeline {
+        list-style: none;
+        margin: 20px auto 0;
+        max-width: 640px;
+      }
+
+      .timeline li {
+        padding: 10px 0 10px 24px;
+        font-size: 17px;
+        color: var(--text);
+        border-left: 2px solid var(--border);
+        position: relative;
+        margin-left: 10px;
+      }
+
+      .timeline li::before {
+        content: "";
+        position: absolute;
+        left: -7px;
+        top: 18px;
+        width: 12px;
+        height: 12px;
+        background: var(--accent);
+        border-radius: 50%;
+        border: 2px solid var(--bg);
+      }
+
+      .timeline li.pause::before {
+        background: var(--green);
+      }
+
+      .timeline .time {
+        color: var(--accent);
+        font-family: var(--font-mono);
+        font-weight: 600;
+        display: inline-block;
+        width: var(--time-width, 80px);
+      }
+
+      .timeline li.pause .time {
+        color: var(--green);
+      }
+
+      /* Help indicator (shows briefly on load) */
+      .help-hint {
+        position: fixed;
+        bottom: 60px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--dim);
+        opacity: 0.6;
+        pointer-events: none;
+        animation: fadeOutHint 5s ease-out forwards;
+        z-index: 20;
+      }
+
+      @keyframes fadeOutHint {
+        0%,
+        70% {
+          opacity: 0.6;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+
+      /* Projector sizing: scale content so 1920x1080 fits comfortably */
+      @media (min-aspect-ratio: 16/9) and (min-width: 1600px) {
+        html,
+        body {
+          font-size: 22px;
+        }
+      }
+
+      /* Print / PDF */
+      @media print {
+        html,
+        body {
+          overflow: auto;
+        }
+        .slide {
+          display: flex !important;
+          opacity: 1 !important;
+          position: relative;
+          page-break-after: always;
+          height: 100vh;
+        }
+        .chrome-bottom,
+        .help-hint {
+          display: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="deck" id="deck">
+      <!-- ============================================================
+           SECTIE 0 · OPENING (4 slides)
+           ============================================================ -->
+
+      <!-- Slide 1: Title -->
+      <section class="slide slide--title active" data-index="1">
+        <img
+          src="images/welcome.png"
+          alt="Welcome to Claude Code"
+          style="
+            max-width: 640px;
+            width: 70%;
+            height: auto;
+            border-radius: 14px;
+            margin-bottom: 40px;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45);
+          "
+        />
+        <h1>Claude Code Workshop</h1>
+        <div class="partners">
+          <img
+            src="images/codehive_Logo%20codehive.svg"
+            alt="Codehive"
+          />
+          <span class="x">×</span>
+          <img
+            src="images/homewizard_logo.webp"
+            alt="HomeWizard"
+          />
+        </div>
+        <div class="meta">Coen Stevens · Codehive.nl · 2026</div>
+      </section>
+
+      <!-- Slide 2: Welkom + agenda -->
+      <section class="slide slide--content" data-index="2">
+        <h2>Welkom</h2>
+        <div class="lead">Fijn dat jullie er zijn. Praktische zaken en de planning voor vandaag.</div>
+        <div
+          class="body"
+          style="
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            align-items: start;
+          "
+        >
+          <div class="card-grid" style="gap: 10px; align-items: stretch; width: 100%;">
+            <div class="card card--stacked" style="max-width: 100%;">
+              <h3>Laptop nu open</h3>
+              <p>Clone <code style="color: var(--orange)">github.com/hubristech/workshop-starter</code> en open Claude Code. Setup check volgt zo.</p>
+            </div>
+            <div class="card card--stacked" style="max-width: 100%;">
+              <h3>Vragen</h3>
+              <p>Stel ze direct. Stel zo veel mogelijk.</p>
+            </div>
+            <div class="card card--stacked" style="max-width: 100%;">
+              <h3>Werkwijze</h3>
+              <p>Hands-on, met zo eerst wat introductie.</p>
+            </div>
+            <div class="card card--stacked" style="max-width: 100%;">
+              <h3>API keys</h3>
+              <p>Gedeeld Anthropic-account via HomeWizard.</p>
+            </div>
+          </div>
+          <ul class="timeline" style="margin: 0; max-width: 100%;">
+            <li><span class="time">20 min</span> Blok 1 · Introductie</li>
+            <li><span class="time">10 min</span> Blok 2 · Security &amp; IP</li>
+            <li><span class="time">20 min</span> Blok 3 · Hoe werkt Claude Code</li>
+            <li class="pause"><span class="time">10 min</span> ☕ Pauze</li>
+            <li><span class="time">45 min</span> Blok 4 · Hands-on bouwen</li>
+            <li class="pause"><span class="time">5 min</span> ☕ Pauze</li>
+            <li><span class="time">20 min</span> Blok 5 · Uitbreiden &amp; Review</li>
+            <li><span class="time">15+ min</span> Blok 6 · Production Ready</li>
+            <li><span class="time">10 min</span> FAQ &amp; Afsluiting</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Slide 3: Je instructeur -->
+      <section class="slide slide--content" data-index="3">
+        <h2>Workshop begeleider</h2>
+        <div class="lead">Coen Stevens · Fractional CTO &amp; AI Lead via Codehive.nl</div>
+        <div
+          class="body"
+          style="
+            display: flex;
+            gap: 48px;
+            align-items: center;
+            justify-content: center;
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 0 0 auto;
+            padding-top: 20px;
+          "
+        >
+          <img
+            src="images/coen-headshot.webp"
+            alt="Coen Stevens"
+            style="
+              width: 280px;
+              height: 280px;
+              border-radius: 50%;
+              object-fit: cover;
+              border: 2px solid var(--accent);
+              flex-shrink: 0;
+            "
+          />
+          <div style="flex: 1">
+            <ul class="checks">
+              <li>15+ jaar data-intensieve &amp; AI platforms</li>
+              <li>Ex-YC founder (W2010)</li>
+              <li>Recent: Kilocode.ai, open source Claude Code alternatief</li>
+              <li>Nu: Co-founder Klime.com: Customer Intelligence AI | Codehive
+              </li>
+              <li>Platform architectuur, security-first design, agentic AI</li>
+            </ul>
+            <div
+              style="
+                margin-top: 24px;
+                display: flex;
+                gap: 16px;
+                font-family: var(--font-mono);
+                font-size: 14px;
+                color: var(--muted);
+              "
+            >
+              <span>codehive.nl</span>
+              <span class="dim">·</span>
+              <span>stevens.dev</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 4: Workshop doelen -->
+      <section class="slide slide--content" data-index="4">
+        <h2>Workshop doelen</h2>
+        <div class="lead">Wat neem je straks mee naar huis.</div>
+        <div class="body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>01 · Zelfstandig aan de slag</h3>
+              <p>Na vandaag kun je Claude Code inzetten voor je eigen werk. Door het te doen, niet door erover te praten. Hopelijk enthousiast en zicht op mogelijkheden en beperkingen.</p>
+            </div>
+            <div class="card">
+              <h3>02 · Context engineering</h3>
+              <p>Domeinkennis effectief meegeven via CLAUDE.md.</p>
+            </div>
+            <div class="card">
+              <h3>03 · Team afspraken</h3>
+              <p>Best practices die iedereen kan toepassen. Review, git workflows, CI/CD.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SECTIE 1 · BLOK 1 · INTRO & LANDSCAPE (8 slides)
+           ============================================================ -->
+
+      <!-- Slide 5: Section divider Blok 1 -->
+      <section
+        class="slide slide--divider"
+        data-index="5"
+        data-block="1"
+        data-block-title="Introductie"
+      >
+        <div class="marker">◆</div>
+        <h2>Introductie</h2>
+        <div class="gradient-line"></div>
+        <div class="block-time">BLOK 1 · 20 MIN</div>
+      </section>
+
+      <!-- Slide 6: Mijn journey -->
+      <section
+        class="slide slide--content"
+        data-index="6"
+        data-block="1"
+        data-block-title="Introductie"
+      >
+        <h2>Mijn journey</h2>
+        <div class="lead">Van 0% naar bijna 100% agentic coding in 18 maanden.</div>
+        <div class="body">
+          <ul class="timeline" style="--time-width: 110px">
+            <li>
+              <span class="time">2023</span> Copilot completion · "handige
+              autocomplete"
+            </li>
+            <li>
+              <span class="time">2024</span> Cursor IDE · AI als pair bij de
+              keyboard
+            </li>
+            <li>
+              <span class="time">Mid 2024</span> Claude 3.5 + agentic workflows
+            </li>
+            <li>
+              <span class="time">Begin 2025</span> Kilocode IDE (dogfooding) ·
+              20-80
+            </li>
+            <li>
+              <span class="time">Eind 2025</span> Opus all the way · CLI + plan
+              mode + sub-agents
+            </li>
+            <li>
+              <span class="time">Nu</span> ~90% van mijn code via agents
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Slide 7: AI coding landscape -->
+      <section
+        class="slide slide--content"
+        data-index="7"
+        data-block="1"
+        data-block-title="Introductie"
+      >
+        <h2>Het AI coding landscape</h2>
+        <div class="lead">Niet één tool, een ecosysteem dat elk kwartaal verschuift.</div>
+        <div class="body">
+          <div class="card-grid card-grid--2col">
+            <div class="card">
+              <h3><img class="card-icon" src="images/logos/claude.svg" alt="" /> Claude Code</h3>
+              <p>CLI-first · sub-agents · sterkste agentic model</p>
+            </div>
+            <div class="card">
+              <h3><img class="card-icon" src="images/logos/cursor.svg" alt="" /> Cursor</h3>
+              <p>IDE-native · goede UX · multi-model · minder agentic</p>
+            </div>
+            <div class="card">
+              <h3><img class="card-icon" src="images/kilo.svg" alt="" /> Kilo Code</h3>
+              <p>Open source VS Code extension</p>
+            </div>
+            <div class="card">
+              <h3><img class="card-icon" src="images/logos/githubcopilot.svg" alt="" /> GitHub Copilot</h3>
+              <p>Sterk in completion · agent mode nog relatief nieuw</p>
+            </div>
+            <div class="card">
+              <h3><img class="card-icon" src="images/logos/googlegemini.svg" alt="" /> Gemini CLI</h3>
+              <p>Google's agentic CLI · groot context window · programmeren iets zwakker</p>
+            </div>
+            <div class="card">
+              <h3><img class="card-icon" src="images/logos/antigravity.svg" alt="" /> Antigravity <span style="color: var(--muted); font-weight: 400">(Google)</span></h3>
+              <p>Agent-first IDE (VS Code fork) · orchestreert meerdere agents · Gemini 3, ook Claude · nieuw</p>
+            </div>
+            <div class="card">
+              <h3><img class="card-icon" src="images/logos/openai.svg" alt="" /> Codex CLI</h3>
+              <p>OpenAI · snel in ontwikkeling · aparte model-familie</p>
+            </div>
+            <div class="card">
+              <h3><img class="card-icon" src="images/logos/pi.svg" alt="" /> pi.dev</h3>
+              <p>Open-source minimale agentic CLI · 15+ providers</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 8: Waarom Claude Code vandaag -->
+      <section
+        class="slide slide--content"
+        data-index="8"
+        data-block="1"
+        data-block-title="Introductie"
+      >
+        <h2>Waarom Claude Code vandaag</h2>
+        <div class="lead">
+          De concepten zijn tool-agnostisch, maar we leren het beste met de
+          scherpste tool.
+        </div>
+        <div class="body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>Sterkste agentic model</h3>
+              <p>
+                Claude Opus 4.8 / Sonnet 4.6 presteert nu het hoogst op echte
+                engineering tasks.
+              </p>
+            </div>
+            <div class="card">
+              <h3>CLI-first</h3>
+              <p>
+                Werkt in elke terminal, VS Code, iTerm, Warp, JetBrains, Vim.
+                Geen vendor lock-in.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Plan mode</h3>
+              <p>
+                Eerst denken, dan bouwen. Onderscheidend en leerbaar patroon.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Sub-agents &amp; MCP</h3>
+              <p>
+                Multi-agent orchestratie. Externe tools als first-class context.
+              </p>
+            </div>
+            <div class="card">
+              <h3>HomeWizard koos dit</h3>
+              <p>
+                HomeWizard heeft Claude Code gekozen voor vandaag. De concepten
+                zijn uitwisselbaar: wat je leert werkt ook in Cursor, Copilot of
+                Codex.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 9: Werkt voor alle stacks -->
+      <section
+        class="slide slide--content"
+        data-index="9"
+        data-block="1"
+        data-block-title="Introductie"
+      >
+        <h2>Werkt voor alle stacks</h2>
+        <div class="lead">
+          Eén workflow, elke taal, maar YMMV op exotische platforms.
+        </div>
+        <div class="body">
+          <div class="card-grid">
+            <div class="card">
+              <h3><img class="card-icon" src="images/logos/typescript.svg" alt="" /> TypeScript / JavaScript</h3>
+              <p>Rijkste training data. Next.js, React, Node, hier is Claude op z'n best.</p>
+            </div>
+            <div class="card">
+              <h3><img class="card-icon" src="images/logos/python.svg" alt="" /> Python</h3>
+              <p>Zeer sterk voor data, scripting, ML, backends.</p>
+            </div>
+            <div class="card">
+              <h3><img class="card-icon" src="images/logos/go.svg" alt="" /> Go</h3>
+              <p>Sterk voor systems, networking, CLI tools, cloud-native services.</p>
+            </div>
+            <div class="card">
+              <h3><img class="card-icon" src="images/logos/rust.svg" alt="" /> Rust</h3>
+              <p>Uitstekend voor low-level systems, performance-kritisch werk, embedded.</p>
+            </div>
+            <div class="card">
+              <h3><img class="card-icon" src="images/logos/cplusplus.svg" alt="" /> C · C++ · firmware</h3>
+              <p>
+                Goed, maar context engineering is kritisch. Datasheets,
+                constraints, etc.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 10: Hands-on project intro -->
+      <section
+        class="slide slide--content"
+        data-index="10"
+        data-block="1"
+        data-block-title="Introductie"
+      >
+        <h2>Het hands-on project</h2>
+        <div class="lead">Eén gedeelde minimale Next.js codebase (startpunt), iedereen op dezelfde stack.</div>
+        <div class="body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>Waarom één codebase?</h3>
+              <p>Consistentie, zelfde startpunt, zelfde problemen.</p>
+            </div>
+            <div class="card">
+              <h3>Het project</h3>
+              <p>Next.js app rond meterstanden, login, visualisatie, CSV import.</p>
+            </div>
+            <div class="card">
+              <h3>De taken</h3>
+              <p>Realistische features: auth, styling, dataviz, sharing, forecasting.</p>
+            </div>
+          </div>
+          <div
+            style="
+              margin-top: 24px;
+              text-align: center;
+              font-family: var(--font-mono);
+              color: var(--accent);
+              font-size: 18px;
+            "
+          >
+            git clone https://github.com/hubristech/workshop-starter
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 11: Hoe gebruik je Claude Code -->
+      <section
+        class="slide slide--content"
+        data-index="11"
+        data-block="1"
+        data-block-title="Introductie"
+      >
+        <h2>Hoe gebruik je Claude Code<span class="demo-badge">▶ live demo</span></h2>
+        <div class="lead">Overal dezelfde engine. Kies waar je werkt, dan checken we de setup.</div>
+        <div class="body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>CLI</h3>
+              <p>In elke terminal: <code style="color: var(--orange)">claude</code>. De volledige engine, nieuwe features landen hier eerst. Genoeg voor vandaag.</p>
+            </div>
+            <div class="card">
+              <h3>Desktop app</h3>
+              <p>Losse Mac/Windows-app. Draai meerdere Claude-sessies parallel, los van terminal of editor.</p>
+            </div>
+            <div class="card">
+              <h3>VS Code extensie</h3>
+              <p>Inline chat + diff review naast je editor. Zelfde engine eronder, fijn voor wie liever niet in de terminal werkt.</p>
+            </div>
+            <div class="card">
+              <h3>JetBrains</h3>
+              <p>Plugin voor IntelliJ, PyCharm, GoLand, CLion, etc. Voor wie in de JetBrains-IDE's leeft.</p>
+            </div>
+          </div>
+          <div style="margin-top: 20px; color: var(--muted); font-size: 16px; text-align: center">
+            Onder de motorkap altijd dezelfde CLI. Vandaag volstaat de CLI of VS Code, JetBrains mag ook.
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 12: Setup check -->
+      <section
+        class="slide slide--content"
+        data-index="12"
+        data-block="1"
+        data-block-title="Introductie"
+      >
+        <h2>Setup check</h2>
+        <div class="lead">Controleer of je klaar bent om te gaan.</div>
+        <div class="body" style="display: flex; flex-direction: column; align-items: center; flex: 0 0 auto; padding-top: 20px">
+          <ul class="checks">
+            <li>Claude Code CLI geïnstalleerd · <code style="font-family: var(--font-mono); color: var(--orange)">claude</code>&nbsp;<code style="font-family: var(--font-mono); color: var(--orange)"> --version</code></li>
+            <li>VS Code-extensie of JetBrains-plugin · optioneel, alleen CLI is genoeg</li>
+            <li>Workshop repo gecloned en <code style="font-family: var(--font-mono); color: var(--orange)">npm install</code> draait</li>
+            <li>API key gezet · <code style="font-family: var(--font-mono); color: var(--orange)">ANTHROPIC_API_KEY</code> in je env</li>
+            <li>Node 20+ · Git · werkende terminal</li>
+          </ul>
+          <div style="margin-top: 20px; color: var(--muted); font-size: 16px; text-align: center">
+            Loopt het niet? Steek je hand op, we fixen het in de eerste 5 minuten.
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SECTIE 2 · BLOK 2 · SECURITY & IP (2 slides)
+           ============================================================ -->
+
+      <!-- Slide 13: Section divider Blok 2 -->
+      <section
+        class="slide slide--divider"
+        data-index="13"
+        data-block="2"
+        data-block-title="Security & IP"
+      >
+        <div class="marker">◆</div>
+        <h2>Security &amp; IP</h2>
+        <div class="gradient-line"></div>
+        <div class="block-time">BLOK 2 · 10 MIN</div>
+      </section>
+
+      <!-- Slide 14: Security & IP (single compact slide) -->
+      <section
+        class="slide slide--content"
+        data-index="14"
+        data-block="2"
+        data-block-title="Security & IP"
+      >
+        <h2>Security &amp; IP</h2>
+        <div class="lead">
+          Wat gaat er naar de cloud, hoe bescherm je IP, hoe krijg je keys.
+        </div>
+        <div class="body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>Wat stuurt Claude Code?</h3>
+              <p>
+                Prompts + alle files die Claude in de sessie leest of greppt.
+                Geen auto-upload, maar brede prompts kunnen de hele repo
+                raken. Buiten je working dir: niets.
+              </p>
+            </div>
+            <div class="card">
+              <h3>IP &amp; secrets beschermen<span class="demo-badge">▶ live demo</span></h3>
+              <p>
+                Secrets in env vars, nooit in prompts. <code>/permissions</code>
+                om te beperken (of <code>.claude/settings.json</code> openen).
+                Denk aan firmware blobs en interne specs.
+              </p>
+            </div>
+            <div class="card">
+              <h3>API key opties</h3>
+              <p>
+                <img class="card-icon" src="images/logos/googlecloud.svg" alt="" style="height: 18px; vertical-align: -3px; margin-right: 4px;" />Google Vertex (data in GCP) ·
+                <img class="card-icon" src="images/logos/bedrock.svg" alt="" style="height: 18px; vertical-align: -3px; margin: 0 4px 0 6px;" />AWS Bedrock (data in AWS).
+                Beide houden data in eigen cloud.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Workshop vandaag</h3>
+              <p>
+                HomeWizard heeft zelf keys/accounts. We gaan niet met de
+                HomeWizard-code aan de slag.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SECTIE 3 · BLOK 3 · HOE WERKT CLAUDE CODE (10 slides)
+           ============================================================ -->
+
+      <!-- Slide 15: Section divider Blok 3 -->
+      <section
+        class="slide slide--divider"
+        data-index="15"
+        data-block="3"
+        data-block-title="Hoe werkt Claude Code"
+      >
+        <div class="marker">◆</div>
+        <h2>Hoe werkt Claude Code</h2>
+        <div class="gradient-line"></div>
+        <div class="block-time">BLOK 3 · 20 MIN</div>
+      </section>
+
+      <!-- Slide 16: CLI basics -->
+      <section
+        class="slide slide--content"
+        data-index="16"
+        data-block="3"
+        data-block-title="Hoe werkt Claude Code"
+      >
+        <h2>CLI basics<span class="demo-badge">▶ live demo</span></h2>
+        <div class="lead">Werkt in elke terminal. Start met één commando.</div>
+        <div class="body">
+          <div class="terminal">
+            <div><span class="prompt">$</span> cd my-project</div>
+            <div><span class="prompt">$</span> claude</div>
+            <div class="output">✻ Welcome to Claude Code.</div>
+            <div class="output">&nbsp;&nbsp;What would you like to work on?</div>
+            <br />
+            <div>
+              <span class="prompt">&gt;</span> Add a CSV upload endpoint to
+              /api/meters
+            </div>
+            <br />
+            <div class="output">✻ Reading routes...</div>
+            <div class="output">✻ I'll add it at /api/meters/upload with validation.</div>
+            <div><span class="prompt">&gt;</span> <span class="cursor"></span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 17: VS Code extension -->
+      <section
+        class="slide slide--content"
+        data-index="17"
+        data-block="3"
+        data-block-title="Hoe werkt Claude Code"
+      >
+        <h2>VS Code extensie<span class="demo-badge">▶ live demo</span></h2>
+        <div class="lead">Inline, met context-awareness. Voor wie liever niet in de terminal werkt.</div>
+        <div class="body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>Inline chat</h3>
+              <p>Chat-paneel naast je editor. Ziet je open files.</p>
+            </div>
+            <div class="card">
+              <h3>@-mentions</h3>
+              <p>Tag specifieke files, functies of folders als context.</p>
+            </div>
+            <div class="card">
+              <h3>Diff review</h3>
+              <p>Claude's edits verschijnen in de VS Code source control view. Review ze daar.</p>
+            </div>
+            <div class="card">
+              <h3>Zelfde engine</h3>
+              <p>Onder de motorkap: dezelfde CLI. Wissel gerust heen en weer.</p>
+            </div>
+            <div class="card">
+              <h3>Loopt achter!</h3>
+              <p>Niet alle features zijn al beschikbaar in de UI of als slash commands (bijv. git worktrees).</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 18: Model keuzes (verplaatst uit Blok 1) -->
+      <section
+        class="slide slide--content"
+        data-index="18"
+        data-block="3"
+        data-block-title="Hoe werkt Claude Code"
+      >
+        <h2>Model keuzes<span class="demo-badge">▶ live demo</span></h2>
+        <div class="lead">Opus voor denken. Sonnet voor doen. Haiku voor schaal.</div>
+        <div class="body" style="display: flex; flex-direction: column; align-items: center; gap: 16px">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 1200px; width: 100%">
+            <div class="card card--stacked" style="max-width: 100%">
+              <h3>Opus 4.8</h3>
+              <p>Planning, architectuur, complexe refactoring. Slimst voor harde problemen.</p>
+            </div>
+            <div class="card card--stacked" style="max-width: 100%">
+              <h3>Sonnet 4.6</h3>
+              <p>Default werkpaard. Snelheid, kosten en kwaliteit in balans. 95% van taken.</p>
+            </div>
+            <div class="card card--stacked" style="max-width: 100%">
+              <h3>Haiku 4.5</h3>
+              <p>Batch, bulk edits, CI-runs, snelle scans. Goedkoop en snel.</p>
+            </div>
+          </div>
+          <!-- <div style="flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; width: 100%">
+            <img
+              src="images/opus-4.8-benchmark.png"
+              alt="Opus 4.8 benchmarks vs Opus 4.7, GPT-5.5, Gemini 3.1 Pro"
+              style="
+                max-width: 100%;
+                max-height: 100%;
+                border-radius: var(--radius);
+                border: 1px solid var(--border-strong);
+                box-shadow: 0 10px 32px rgba(0, 0, 0, 0.4);
+                background: #fff;
+              "
+            />
+          </div> -->
+          <div style="font-family: var(--font-mono); font-size: 13px; color: var(--muted); text-align: center">
+            Tip: wissel live met <code style="color: var(--orange)">/model</code> · effort-niveaus sturen denktijd, Opus 4.8 staat default op high · cijfers via anthropic.com
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 19: Begin met codebase Q&A -->
+      <section
+        class="slide slide--content"
+        data-index="19"
+        data-block="3"
+        data-block-title="Hoe werkt Claude Code"
+      >
+        <h2>Begin met codebase Q&amp;A<span class="demo-badge">▶ live demo</span></h2>
+        <div class="lead">
+          Eerst begrijpen, dan bouwen. Anthropic gebruikt het voor onboarding.
+        </div>
+        <div class="body" style="display: flex; gap: 30px">
+          <div style="flex: 1">
+            <ul class="checks">
+              <li>Stel de vragen die je een senior engineer zou stellen</li>
+              <li>Geen speciale prompt nodig</li>
+              <li>Claude leest sneller, vat samen, linkt naar regels</li>
+              <li>Onboarding sneller, druk op collega's lager</li>
+            </ul>
+            <div class="callout">
+              Tip: voor nieuwe codebases is dit je eerste 30 minuten. Géén
+              edits, alleen begrijpen.
+            </div>
+          </div>
+          <div class="terminal" style="flex: 1; font-size: 13px">
+            <div><span class="prompt">&gt;</span> Hoe werkt onze sessie- en login-flow in /src/auth?</div>
+            <div><span class="prompt">&gt;</span> Waar wordt parseMeterReading() aangeroepen en waarom?</div>
+            <div><span class="prompt">&gt;</span> Welke edge cases handelt CustomerOnboardingFlowImpl af?</div>
+            <div><span class="prompt">&gt;</span> Waarom roept deze code foo() aan in plaats van bar() op regel 333?</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 20: CLAUDE.md fundament -->
+      <section
+        class="slide slide--content"
+        data-index="20"
+        data-block="3"
+        data-block-title="Hoe werkt Claude Code"
+      >
+        <h2>CLAUDE.md · het fundament</h2>
+        <div class="lead">
+          Context engineering is belangrijker dan prompt engineering. CLAUDE.md
+          is waar het begint.
+        </div>
+        <div class="body">
+          <div class="card-grid card-grid--2col">
+            <div class="card">
+              <h3>Start met <code style="color: var(--orange)">/init</code></h3>
+              <p>Genereert een eerste versie op basis van je codebase. Daarna verfijnen.</p>
+            </div>
+            <div class="card">
+              <h3>Wat erin?</h3>
+              <p>Bash commands · afwijkende code style · test runners · repo-conventies · env-quirks · niet-obvious gotchas.</p>
+            </div>
+            <div class="card">
+              <h3>Wat NIET erin?</h3>
+              <p>Wat Claude uit de code kan lezen · standaard taalconventies · self-evident regels.</p>
+            </div>
+            <div class="card">
+              <h3>Behandel als code</h3>
+              <p>Commit mee · PR-review · prune · te lang = Claude negeert regels. <code>IMPORTANT</code>/<code>YOU MUST</code> als emphasis.</p>
+            </div>
+            <div class="card">
+              <h3>AGENTS.md</h3>
+              <p>Cross-tool standaard, werkt hiërarchisch: geneste files per map, dichtstbijzijnde wint. Claude Code leest <code>CLAUDE.md</code>, niet <code>AGENTS.md</code>: zet <code>@AGENTS.md</code> boven in je CLAUDE.md of laat <code>/init</code> het opnemen. Eén bron voor alle tools.</p>
+            </div>
+            <div class="card">
+              <h3>Amnesia + auto-memory</h3>
+              <p>Elke sessie start blanco. CLAUDE.md = manuele projectcontext in git. Auto-memory (<code>~/.claude/.../MEMORY.md</code>) = Claude's observaties over jou en het project, automatisch bewaard.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 21: CLAUDE.md voorbeeld -->
+      <section
+        class="slide slide--content"
+        data-index="21"
+        data-block="3"
+        data-block-title="Hoe werkt Claude Code"
+      >
+        <h2>CLAUDE.md voorbeeld</h2>
+        <div class="lead">Domein meegeven, werkt hetzelfde voor cloud als voor embedded.</div>
+        <div class="body">
+          <div class="terminal" style="font-size: 14px">
+            <div class="output"># HomeWizard meterstanden app</div>
+            <br />
+            <div class="output">## Domein</div>
+            <div class="output">- P1-protocol: seriële smart-meter output, DSMR 5.0</div>
+            <div class="output">- Tariefstructuren: enkel / dubbel / dynamisch (EPEX)</div>
+            <br />
+            <div class="output">## Stack</div>
+            <div class="output">- Next.js 16 · App Router · TS strict · Tailwind v4</div>
+            <div class="output">- Prisma 7 · SQLite · auth via BetterAuth</div>
+            <br />
+            <div class="output">## Conventies</div>
+            <div class="output">- Server components default, "use client" alleen als echt nodig</div>
+            <div class="output">- API routes in /app/api/*, Zod voor input validatie</div>
+          </div>
+          <div class="callout" style="margin-top: 20px">
+            Tip: open de <a href="https://github.com/hubristech/workshop-starter/blob/main/CLAUDE.md">CLAUDE.md van het starter-project</a> erbij. Die gebruikt
+            <a href="https://github.com/multica-ai/andrej-karpathy-skills">Karpathy-inspired guidelines</a>
+            als basis (Think Before Coding · Simplicity First · Surgical Changes · Goal-Driven Execution). Goede starter voor je eigen repo's.
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 22: Explore · Plan · Code · Commit -->
+      <section
+        class="slide slide--content"
+        data-index="22"
+        data-block="3"
+        data-block-title="Hoe werkt Claude Code"
+      >
+        <h2>Explore · Plan · Code · Commit<span class="demo-badge">▶ live demo</span></h2>
+        <div class="lead">
+          De 4-fase cadans voor elke niet-triviale taak. Anthropic's aanbevolen
+          workflow.
+        </div>
+        <div class="body">
+          <div class="card-grid card-grid--2col">
+            <div class="card card--stacked">
+              <h3>01 · Explore</h3>
+              <p>Plan mode aan (Shift+Tab). Claude leest code, beantwoordt vragen, maakt geen edits. Begrijp eerst, code later.</p>
+            </div>
+            <div class="card card--stacked">
+              <h3>02 · Plan</h3>
+              <p>Vraag een concreet plan: welke files, welke flow, welke tests. Ctrl+G opent het plan in je editor om te tweaken.</p>
+            </div>
+            <div class="card card--stacked">
+              <h3>03 · Code</h3>
+              <p>Plan mode uit. Claude bouwt en verifieert tegen het plan. Volg de diffs.</p>
+            </div>
+            <div class="card card--stacked">
+              <h3>04 · Commit</h3>
+              <p>Claude schrijft commit message + opent PR met test plan in de body.</p>
+            </div>
+          </div>
+          <div class="callout" style="margin-top: 20px">
+            Vuistregel: hak werk in kleine phases, één vertical slice per keer
+            (DB → API → UI → test). Skip de plan-fase alleen voor typo's of
+            renames die je in één zin beschrijft.
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 23: Feedback loops -->
+      <section
+        class="slide slide--content"
+        data-index="23"
+        data-block="3"
+        data-block-title="Hoe werkt Claude Code"
+      >
+        <h2>Feedback loops</h2>
+        <div class="lead">
+          Anthropic noemt dit "the single highest-leverage thing you can do".
+        </div>
+        <div class="body" style="display: flex; gap: 30px">
+          <div style="flex: 0 0 40%">
+            <div class="card-grid" style="gap: 10px">
+              <div class="card card--stacked" style="max-width: 100%">
+                <h3>Verifieerbare success criteria</h3>
+                <p>Geef testcases, expected outputs of een screenshot mee, geen vage opdracht.</p>
+              </div>
+              <div class="card card--stacked" style="max-width: 100%">
+                <h3>Lint · typecheck · tests<span class="demo-badge">▶ live demo</span></h3>
+                <p>Laat Claude <code>npm run lint</code> en <code>tsc</code> zelf draaien (werken direct in de starter). Tests? Claude schrijft ze met <code>vitest</code> en draait ze daarna.</p>
+              </div>
+              <div class="card card--stacked" style="max-width: 100%">
+                <h3>Visuele verificatie</h3>
+                <p>Paste screenshot van de gewenste UI, laat Claude er één maken en de twee vergelijken tot match.</p>
+              </div>
+              <div class="card card--stacked" style="max-width: 100%">
+                <h3>Root cause, niet symptoom</h3>
+                <p>"Build faalt met error X · fix de root cause, suppress de error niet."</p>
+              </div>
+            </div>
+          </div>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 16px; align-self: flex-start">
+            <div class="terminal" style="font-size: 13px">
+            <div><span class="prompt">&gt;</span> implement validateEmail. Tests:</div>
+            <div class="output">&nbsp;&nbsp;user@example.com → true</div>
+            <div class="output">&nbsp;&nbsp;invalid → false</div>
+            <div class="output">&nbsp;&nbsp;user@.com → false</div>
+            <div class="output">&nbsp;&nbsp;Run the tests after implementing.</div>
+            <br />
+            <div class="output">✻ Writing validateEmail...</div>
+            <div class="output">✻ Running npm test... 3/3 passing.</div>
+            </div>
+            <div class="callout">
+              Tip: kun je het niet verifiëren, ship het niet.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 24: Slash commands -->
+      <section
+        class="slide slide--content"
+        data-index="24"
+        data-block="3"
+        data-block-title="Hoe werkt Claude Code"
+      >
+        <h2>Slash commands<span class="demo-badge">▶ live demo</span></h2>
+        <div class="lead">Korte snelheid-boosters. Je kunt eigen commands schrijven.</div>
+        <div class="body">
+          <div class="card-grid card-grid--2col">
+            <div class="card">
+              <h3><code style="color: var(--orange)">/init</code></h3>
+              <p>Genereer CLAUDE.md, één keer per repo.</p>
+            </div>
+            <div class="card">
+              <h3><code style="color: var(--orange)">/clear</code></h3>
+              <p>Reset context. Nieuwe sessie, geen history.</p>
+            </div>
+            <div class="card">
+              <h3><code style="color: var(--orange)">/compact</code></h3>
+              <p>Vat sessie samen, behoud kernpunten.</p>
+            </div>
+            <div class="card">
+              <h3><code style="color: var(--orange)">/review</code></h3>
+              <p>Eigen code reviewen · functioneel + security.</p>
+            </div>
+            <div class="card">
+              <h3><code style="color: var(--orange)">/agents</code></h3>
+              <p>Beheer sub-agents.</p>
+            </div>
+            <div class="card">
+              <h3><code style="color: var(--orange)">/goal</code></h3>
+              <p>Completion-conditie. Claude werkt tot voldaan.</p>
+            </div>
+            <div class="card">
+              <h3>Custom</h3>
+              <p><code>.claude/skills/foo/SKILL.md</code> voor je eigen <code style="color: var(--orange)">/foo</code>.</p>
+            </div>
+          </div>
+          <div class="callout">
+            Opdracht: probeer er 3 in je repo. <code style="color: var(--orange)">/help</code> (alleen in de CLI) toont alles wat in jouw versie zit. Meer over <code>/clear</code> en <code>/compact</code> straks bij context-management.
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 25: Skills · herbruikbare workflows -->
+      <section
+        class="slide slide--content"
+        data-index="25"
+        data-block="3"
+        data-block-title="Hoe werkt Claude Code"
+      >
+        <h2>Skills · herbruikbare workflows</h2>
+        <div class="body" style="display: flex; gap: 30px">
+          <div style="flex: 1">
+            <div class="card-grid">
+              <div class="card">
+                <h3>In het starter project<span class="demo-badge">▶ live demo</span></h3>
+                <div>
+                  <p><code>.claude/skills/{gc,gcp,pr,grill-me}/SKILL.md</code>. Git: <code style="color: var(--orange)">/gc</code> commit · <code style="color: var(--orange)">/gcp</code> commit + push · <code style="color: var(--orange)">/pr</code> open pull request (geen <code>--amend</code>, geen <code>--no-verify</code>).</p>
+                  <p style="margin-top: 8px"><code style="color: var(--orange)">/grill-me</code> · interviewt je over je plan tot shared understanding. Bron: <a href="https://github.com/mattpocock/skills/blob/main/skills/productivity/grill-me/SKILL.md">mattpocock/skills</a>.</p>
+                </div>
+              </div>
+              <div class="card">
+                <h3>Auto-invoke of expliciet?</h3>
+                <p><code>disable-model-invocation: true</code> zorgt dat de skill alleen via <code style="color: var(--orange)">/&lt;name&gt;</code> triggert · handig voor git-acties die je zelf wilt sturen.</p>
+              </div>
+              <div class="card">
+                <h3>Wanneer een skill?</h3>
+                <p>Patroon herhaalt zich? Maak een skill. Body laadt alleen on-demand, dus dure procedures kosten niets tot je ze gebruikt.</p>
+              </div>
+              <div class="card">
+                <h3>Voorbeelden om te delen</h3>
+                <p><code style="color: var(--orange)">/fix-issue 1234</code> · <code style="color: var(--orange)">/deploy</code>.</p>
+              </div>
+              <div class="card">
+                <h3>Open standaard</h3>
+                <p>Skills volgen de <a href="https://agentskills.io">Agent Skills</a>-standaard · werken ook in Cursor en Codex.</p>
+              </div>
+            </div>
+          </div>
+          <!-- <div class="terminal" style="flex: 1; font-size: 12px">
+            <div class="output">---</div>
+            <div class="output">description: Stage and commit with</div>
+            <div class="output">&nbsp;&nbsp;conventional message</div>
+            <div class="output">allowed-tools: Bash(git *)</div>
+            <div class="output">disable-model-invocation: true</div>
+            <div class="output">---</div>
+            <br />
+            <div class="output">1. git add -A</div>
+            <div class="output">2. git diff --cached (review)</div>
+            <div class="output">3. Write Conventional Commit:</div>
+            <div class="output">&nbsp;&nbsp; &lt;type&gt;(&lt;scope&gt;): &lt;subject&gt;</div>
+            <div class="output">4. git commit (HEREDOC, no confirm)</div>
+            <div class="output">5. No --amend, no --no-verify,</div>
+            <div class="output">&nbsp;&nbsp; no push.</div> -->
+          <!-- </div> -->
+        </div>
+      </section>
+
+      <!-- Slide 26: Context management & course correction -->
+      <section
+        class="slide slide--content"
+        data-index="26"
+        data-block="3"
+        data-block-title="Hoe werkt Claude Code"
+      >
+        <h2>Context management</h2>
+        <div class="lead">
+          Performance daalt als context vol raakt. Bijsturen kost niets, slecht
+          prompten kost een hele sessie.
+        </div>
+        <div class="body">
+          <div class="card-grid card-grid--2col">
+            <div class="card">
+              <h3>Context window</h3>
+              <p>200K-1M tokens, waarde daalt naar het einde. Bij ~70% actief opruimen.</p>
+            </div>
+            <div class="card">
+              <h3>Wanneer <code style="color: var(--orange)">/clear</code></h3>
+              <p>Nieuwe taak los van vorige. Vermijdt contamination.</p>
+            </div>
+            <div class="card">
+              <h3>Wanneer <code style="color: var(--orange)">/compact</code></h3>
+              <p>Lange sessie zelfde onderwerp. <code>/compact focus on X</code> voor sturing.</p>
+            </div>
+            <div class="card">
+              <h3>Wanneer <code style="color: var(--orange)">/context</code><span class="demo-badge">▶ live demo</span></h3>
+              <p>Toont token-verdeling per tool/file/MCP-server. Spot bloat: wie vreet je context window op?</p>
+            </div>
+            <div class="card">
+              <h3>Escape &amp; rewind</h3>
+              <p><code>Esc</code> stopt Claude midden in actie. <code>Esc+Esc</code> of <code>/rewind</code> herstelt conversatie/code naar checkpoint (automatisch bij elke change).</p>
+            </div>
+            <div class="card">
+              <h3>"Undo that"</h3>
+              <p>Claude draait zijn eigen changes terug.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 27: Sub-agents · delegation -->
+      <section
+        class="slide slide--content"
+        data-index="27"
+        data-block="3"
+        data-block-title="Hoe werkt Claude Code"
+      >
+        <h2>Sub-agents · delegation</h2>
+        <div class="lead">
+          Main agent delegeert een taak. Sub-agent doet het werk in eigen
+          context en rapporteert kort terug. Main context blijft schoon.
+        </div>
+        <div class="body">
+          <div class="card-grid card-grid--2col">
+            <div class="card">
+              <h3>Delegation flow</h3>
+              <p>Main spawnt sub-agent → die leest files, runt tools → stuurt alleen een samenvatting terug.</p>
+            </div>
+            <div class="card">
+              <h3>Eigen context</h3>
+              <p>Sub-agent leest 20 files in een eigen window; jij ziet alleen de conclusie. Geen file-dumps in jouw context.</p>
+            </div>
+            <div class="card">
+              <h3>Investigation</h3>
+              <p><code>"use a subagent to investigate how auth handles token refresh"</code>.</p>
+            </div>
+            <div class="card">
+              <h3>Adversarial review</h3>
+              <p>Na implementatie: <code>"use a subagent to review this diff for edge cases"</code>. Verse ogen, geen bias.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 28: Common failure patterns -->
+      <section
+        class="slide slide--content"
+        data-index="28"
+        data-block="3"
+        data-block-title="Hoe werkt Claude Code"
+      >
+        <h2>Common failure patterns</h2>
+        <div class="lead">
+          Herken deze vroeg en je bespaart uren. Komen tijdens je hands-on terug.
+        </div>
+        <div class="body">
+          <div class="card-grid card-grid--2col">
+            <div class="card">
+              <h3>Kitchen sink session</h3>
+              <p>Eén taak, dan iets anders, dan terug. Context vol ruis. → <code style="color: var(--orange)">/clear</code> tussen losse taken.</p>
+            </div>
+            <div class="card">
+              <h3>Correcting over and over</h3>
+              <p>Twee keer corrigeren, nog niet goed? Context vervuild. → <code style="color: var(--orange)">/clear</code> + nieuwe prompt met wat je geleerd hebt.</p>
+            </div>
+            <div class="card">
+              <h3>Over-specified CLAUDE.md</h3>
+              <p>Te lang? Belangrijke regels verdwijnen in de ruis. → Prune. Doet Claude het al goed zonder, schrap.</p>
+            </div>
+            <div class="card">
+              <h3>Trust-then-verify gap</h3>
+              <p>Plausibel ogende code, edge cases falen. → Verifieerbare criteria. Geen verificatie, geen ship.</p>
+            </div>
+            <div class="card">
+              <h3>Infinite exploration</h3>
+              <p>"Investigeer dit" zonder scope. Claude leest 200 files. → Scope smal of sub-agent.</p>
+            </div>
+            <div class="card">
+              <h3>Herken het, herstart</h3>
+              <p>Herken het patroon, herstart, ga door.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           PAUZE 1 (1 slide)
+           ============================================================ -->
+
+      <!-- Slide 29: Pauze 10 min -->
+      <section class="slide slide--pause" data-index="29">
+        <div class="icon">☕</div>
+        <h2>PAUZE</h2>
+        <div class="duration">10 minuten</div>
+        <div class="hint">Laat weten als je claude code niet werkt!</div>
+      </section>
+
+      <!-- ============================================================
+           SECTIE 4 · BLOK 4 · HANDS-ON BOUWEN (5 slides)
+           ============================================================ -->
+
+      <!-- Slide 30: Section divider Blok 4 -->
+      <section
+        class="slide slide--divider"
+        data-index="30"
+        data-block="4"
+        data-block-title="Hands-on bouwen"
+      >
+        <div class="marker">◆</div>
+        <h2>Hands-on bouwen</h2>
+        <div class="gradient-line"></div>
+        <div class="block-time">BLOK 4 · 45 MIN</div>
+      </section>
+
+      <!-- Slide 31: Het project -->
+      <section
+        class="slide slide--content"
+        data-index="31"
+        data-block="4"
+        data-block-title="Hands-on bouwen"
+      >
+        <h2>Het project · meterstanden app</h2>
+        <div class="lead">Drie basisopdrachten. Drie add-ons voor snelle bouwers.</div>
+        <div class="body">
+          <div class="split split--p1">
+            <img src="images/homewizard-p1-meter.png" alt="HomeWizard Wi-Fi P1 Meter" />
+            <div class="card-grid" style="gap: 12px">
+              <div class="card card--stacked" style="max-width: 100%">
+                <h3>Basisopdrachten</h3>
+                <ul class="checks">
+                  <li>Gebruikers kunnen inloggen</li>
+                  <li>HomeWizard huisstijl overnemen</li>
+                  <li>CSV met meterstanden uploaden &amp; visualiseren</li>
+                </ul>
+              </div>
+              <div class="card card--stacked" style="max-width: 100%">
+                <h3>Add-ons · als je snel klaar bent</h3>
+                <ul class="checks">
+                  <li>Meterstanden delen met andere gebruikers</li>
+                  <li>Voorspelling op basis van historische data</li>
+                  <li>Weerdata ophalen en ernaast tonen</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 32: Vuistregels voor de hands-on -->
+      <section
+        class="slide slide--content"
+        data-index="32"
+        data-block="4"
+        data-block-title="Hands-on bouwen"
+      >
+        <h2>Vuistregels voor de hands-on</h2>
+        <div class="lead">
+          Vage prompts kosten correcties. Specifieke prompts + feedback loops
+          winnen tijd.
+        </div>
+        <div class="body">
+          <div class="card-grid card-grid--2col">
+            <div class="card">
+              <h3>Plan eerst</h3>
+              <p>Plan mode aan. Claude schrijft uit, jij reviewt, dan pas approve.</p>
+            </div>
+            <div class="card">
+              <h3>Geef specifieke context</h3>
+              <p>
+                Welk bestand (<code>@file.ts</code>), welke conventie ("zoals
+                X.tsx"), welk symptoom. <code>@</code> voor files, paste
+                screenshots, pipe data (<code>cat error.log | claude</code>).
+              </p>
+            </div>
+            <div class="card">
+              <h3>Klein + vertical slices</h3>
+              <p>
+                Kleine stapjes als vuistregel. Eén feature door DB → API → UI →
+                tests. Dunne slice die e2e werkt &gt; halve lagen. Direct
+                testbaar = directe feedback.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Laat bouwen + verifiëren</h3>
+              <p>
+                Volg diffs. Claude draait tests, typecheck, lint zelf. Geen
+                verificatie? Geen ship.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Review</h3>
+              <p>
+                <code style="color: var(--orange)">/review</code> voor
+                functioneel + security. Of sub-agent in verse context.
+              </p>
+            </div>
+          </div>
+          <div class="terminal" style="margin-top: 20px; font-size: 14px; max-width: 1100px; margin-left: auto; margin-right: auto">
+            <div class="output" style="color: var(--orange)">Vaag:</div>
+            <div><span class="prompt">&gt;</span> Fix the CSV upload bug.</div>
+            <br />
+            <div class="output" style="color: var(--accent)">Specifiek:</div>
+            <div><span class="prompt">&gt;</span> Find the likely cause of the failing CSV upload.</div>
+            <div>&nbsp;&nbsp;Don't change code yet. Explain which files are involved</div>
+            <div>&nbsp;&nbsp;and propose a minimal fix. Run the failing test after.</div>
+          </div>
+          <div style="margin-top: 16px; color: var(--muted); font-size: 16px; text-align: center">
+            Tip: commit vaak · review suggesties kritisch · roep hulp bij blockers.
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 33: Go time -->
+      <section
+        class="slide slide--content"
+        data-index="33"
+        data-block="4"
+        data-block-title="Hands-on bouwen"
+      >
+        <h2>Go time!</h2>
+        <div class="lead">40 minuten bouwen. Hulp is er, gebruik het.</div>
+        <div class="body" style="display: flex; flex-direction: column; align-items: center; justify-content: center">
+          <div style="font-size: 17px; color: var(--text); margin-bottom: 22px; text-align: center">
+            <span style="color: var(--accent); font-weight: 600">3 basisopdrachten:</span>
+            inloggen · HomeWizard huisstijl · CSV uploaden &amp; visualiseren
+          </div>
+          <div class="card-grid card-grid--2col" style="max-width: 1100px; width: 100%; margin-bottom: 24px">
+            <div class="card">
+              <h3><span style="color: var(--accent)">Vóór coderen</span></h3>
+              <ul class="checks">
+                <li>Snapt Claude de codebase?</li>
+                <li>Plan gemaakt en gereviewd?</li>
+                <li>Scope klein genoeg?</li>
+                <li>Tests &amp; stopconditie helder?</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3><span style="color: var(--orange)">Ná Claude</span></h3>
+              <ul class="checks">
+                <li>Diff gereviewd, tests groen?</li>
+                <li>Edge cases gecheckt?</li>
+                <li>Geen onnodige complexiteit?</li>
+                <li>Klein gecommit?</li>
+              </ul>
+            </div>
+          </div>
+          <div
+            style="
+              font-family: var(--font-mono);
+              font-size: 24px;
+              color: var(--accent);
+              background: var(--accent-dim);
+              padding: 16px 32px;
+              border-radius: var(--radius);
+              margin-bottom: 20px;
+            "
+          >
+            git clone https://github.com/hubristech/workshop-starter
+          </div>
+          <ul class="checks" style="font-size: 16px">
+            <li>Tijdsbudget: ~40 minuten</li>
+            <li>Claude API key al actief in je env</li>
+            <li>Laat het weten als je een vraag hebt</li>
+            <li>Stuck? Plan mode → laat Claude het zelf uitleggen</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           PAUZE 2 (1 slide)
+           ============================================================ -->
+
+      <!-- Slide 34: Pauze 5 min -->
+      <section class="slide slide--pause" data-index="34">
+        <div class="icon">☕</div>
+        <h2>PAUZE</h2>
+        <div class="duration">5 minuten</div>
+        <div class="hint">Kort blok, blijf in de buurt</div>
+      </section>
+
+      <!-- ============================================================
+           SECTIE 5 · BLOK 5 · UITBREIDEN & REVIEW (4 slides)
+           ============================================================ -->
+
+      <!-- Slide 35: Section divider Blok 5 -->
+      <section
+        class="slide slide--divider"
+        data-index="35"
+        data-block="5"
+        data-block-title="Uitbreiden & Review"
+      >
+        <div class="marker">◆</div>
+        <h2>Uitbreiden &amp; Review</h2>
+        <div class="gradient-line"></div>
+        <div class="block-time">BLOK 5 · 20 MIN</div>
+      </section>
+
+      <!-- Slide 36: Wat heb je gebouwd? -->
+      <section
+        class="slide slide--content"
+        data-index="36"
+        data-block="5"
+        data-block-title="Uitbreiden & Review"
+      >
+        <h2>Wat heb je gebouwd?</h2>
+        <div class="lead">
+          Kort rondje, 2-3 mensen delen wat werkte en wat niet.
+        </div>
+        <div class="body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>Wat ging goed?</h3>
+              <p>Welk deel was verrassend snel? Waar was Claude nuttig?</p>
+            </div>
+            <div class="card">
+              <h3>Waar liep je vast?</h3>
+              <p>Context te groot? Verkeerde aannames? Hallucinaties?</p>
+            </div>
+            <div class="card">
+              <h3>Wat leer je hiervan?</h3>
+              <p>Prompt dat wél werkte · pattern dat niet werkte · tip voor de rest.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 37: Code review met AI -->
+      <section
+        class="slide slide--content"
+        data-index="37"
+        data-block="5"
+        data-block-title="Uitbreiden & Review"
+      >
+        <h2>Code review met AI</h2>
+        <div class="lead">De tweede set ogen die niet moe wordt.</div>
+        <div class="body">
+          <div class="terminal" style="font-size: 14px">
+            <div><span class="prompt">&gt;</span> Review the diff vs main. Focus on:</div>
+            <div>&nbsp;&nbsp;- correctness bugs</div>
+            <div>&nbsp;&nbsp;- security issues (auth, input validation, secrets)</div>
+            <div>&nbsp;&nbsp;- deviation from our CLAUDE.md conventions</div>
+            <br />
+            <div class="output">✻ Reviewing 23 changed files...</div>
+            <div class="output">✻ 3 findings:</div>
+            <div class="output">&nbsp;&nbsp;[HIGH] /api/meters/upload accepteert geen size limit</div>
+            <div class="output">&nbsp;&nbsp;[MED]&nbsp;&nbsp;Session check mist in /api/meters/share</div>
+            <div class="output">&nbsp;&nbsp;[LOW]&nbsp;&nbsp;Component naming wijkt af van kebab-case convention</div>
+          </div>
+          <div style="margin-top: 16px; color: var(--muted); font-size: 15px; text-align: center">
+            Tip: review in een fresh sessie zonder bouw-context. Onafhankelijker.
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 38: Security scan -->
+      <section
+        class="slide slide--content"
+        data-index="38"
+        data-block="5"
+        data-block-title="Uitbreiden & Review"
+      >
+        <h2>Security scan</h2>
+        <div class="lead">Start met <code style="font-family: var(--font-mono); color: var(--orange)">/security-review</code> · OWASP top 10 als prompt template.</div>
+        <div class="body">
+          <div class="card-grid">
+            <div class="card" style="border-color: var(--accent)">
+              <h3 style="color: var(--accent)"><code style="color: var(--accent)">/security-review</code></h3>
+              <div>
+                <p style="margin-bottom: 8px">Built-in slash command. Scant je diff en rapporteert findings met severity. Waar het naar kijkt:</p>
+                <ul class="checks">
+                  <li>Injection · SQL, NoSQL, command · unsanitized input</li>
+                  <li>Broken auth · session handling, missing checks op API routes</li>
+                  <li>Secrets in code · hardcoded keys, credentials, connection strings</li>
+                  <li>XSS &amp; CSRF · unescaped input, missing tokens op mutaties</li>
+                  <li>Business logic · klopt de auth-logica? Vaak beter dan static tools</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="callout" style="margin-top: 20px">
+            In de praktijk: draai <code style="color: var(--orange)">/security-review</code> als laatste stap voor je een PR opent. Daarna handmatig inzoomen op de categorie die er voor jouw repo het meest toe doet.
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SECTIE 6 · BLOK 6 · PRODUCTION READY (8 slides)
+           ============================================================ -->
+
+      <!-- Slide 39: Section divider Blok 6 -->
+      <section
+        class="slide slide--divider"
+        data-index="39"
+        data-block="6"
+        data-block-title="Production Ready"
+      >
+        <div class="marker">◆</div>
+        <h2>Production Ready</h2>
+        <div class="gradient-line"></div>
+        <div class="block-time">BLOK 6 · 15-30 MIN</div>
+      </section>
+
+      <!-- Slide 40: CLAUDE.md in je repo -->
+      <section
+        class="slide slide--content"
+        data-index="40"
+        data-block="6"
+        data-block-title="Production Ready"
+      >
+        <h2>CLAUDE.md als team artifact</h2>
+        <div class="lead">Team standards op één plek, met duidelijke ownership en levensduur.</div>
+        <div class="body">
+          <div class="card-grid card-grid--2col">
+            <div class="card">
+              <h3>Team standards</h3>
+              <p>Code style · git flow · naming · testing philosophy. Hier hoort het, niet in een wiki.</p>
+            </div>
+            <div class="card">
+              <h3>Ownership</h3>
+              <p>Wie update? Suggestie: elke PR die een nieuw pattern introduceert update ook CLAUDE.md.</p>
+            </div>
+            <div class="card">
+              <h3>Iteratief</h3>
+              <p>Als Claude fouten blijft maken op iets, voeg het toe. Elke fix is een update waard.</p>
+            </div>
+            <div class="card">
+              <h3>Onboarding</h3>
+              <p>Nieuwe teamleden krijgen via CLAUDE.md het mentale model in 5 minuten. Beter dan een wiki die niemand opent.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 41: Hooks · deterministische team-policies -->
+      <section
+        class="slide slide--content"
+        data-index="41"
+        data-block="6"
+        data-block-title="Production Ready"
+      >
+        <h2>Hooks &amp; Policies</h2>
+        <div class="lead">
+          CLAUDE.md is advies. Hooks zijn dwang. Voor regels die elke keer
+          moeten gelden.
+        </div>
+        <div class="body">
+          <div class="card-grid card-grid--2col">
+            <div class="card">
+              <h3>Wat?</h3>
+              <p>Scripts die automatisch draaien bij events: na elke file edit, voor commit, bij session stop, etc.</p>
+            </div>
+            <div class="card">
+              <h3>Voorbeelden</h3>
+              <p>ESLint na elke edit · <code>migrations/</code> folder blokkeren voor writes · Slack-bericht bij completion · sound notification.</p>
+            </div>
+            <div class="card">
+              <h3>Config</h3>
+              <p><code>.claude/settings.json</code> met hook events + commands. Claude kan ze voor je schrijven.</p>
+            </div>
+            <div class="card">
+              <h3>PeonPing</h3>
+              <p><a href="https://www.peonping.com/">peonping.com</a> · Hooks die game-character voice lines spelen bij Claude events (completions, permission requests). MCP + IDE hooks.</p>
+            </div>
+          </div>
+          <div class="callout" style="margin-top: 20px">
+            Tip: hooks voor wat <em>moet</em> (lint, security checks). CLAUDE.md voor wat <em>zou moeten</em> (style).
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 42: Git workflows -->
+      <section
+        class="slide slide--content"
+        data-index="42"
+        data-block="6"
+        data-block-title="Production Ready"
+      >
+        <h2>Git workflows met Claude</h2>
+        <div class="lead">De repetitieve git-dans, uitbesteed via skills. Gebruik <code style="font-family: var(--font-mono); color: var(--orange)">/gc</code>, <code style="font-family: var(--font-mono); color: var(--orange)">/gcp</code>, <code style="font-family: var(--font-mono); color: var(--orange)">/pr</code></div>
+        <div class="body">
+          <div class="card-grid">
+            <div class="card">
+              <h3><code style="color: var(--orange)">/gc</code> · commit</h3>
+              <p>
+                Skill in <code>.claude/skills/gc/SKILL.md</code>: stage check → diff lezen → conventional commit volgens jouw CLAUDE.md-conventie. Geen <code>--no-verify</code>, geen amend.
+              </p>
+            </div>
+            <div class="card">
+              <h3><code style="color: var(--orange)">/gcp</code> · commit + push</h3>
+              <p>Zelfde als <code>/gc</code> maar pusht direct. Voor branches waar je solo werkt; main blokkeer je via een hook.</p>
+            </div>
+            <div class="card">
+              <h3><code style="color: var(--orange)">/pr</code> · open pull request</h3>
+              <p>Skill schrijft titel + body (summary, test plan, risks) op basis van diff vs main en opent de PR via <code>gh pr create</code>.</p>
+            </div>
+          </div>
+          <div class="callout" style="margin-top: 20px">
+            Patroon: zodra je een git-handeling 2× hebt uitgelegd, vraag Claude er een skill van te maken. Body laadt on-demand, dus gratis tot je <code style="color: var(--orange)">/gc</code> tikt.
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 43: MCP servers uitleg -->
+      <section
+        class="slide slide--content"
+        data-index="43"
+        data-block="6"
+        data-block-title="Production Ready"
+      >
+        <h2><img src="images/logos/mcp.svg" alt="MCP" style="height: 36px; vertical-align: -8px; margin-right: 14px; opacity: 0.95;" />MCP · Model Context Protocol<span class="demo-badge">▶ live demo</span></h2>
+        <div class="lead">De standaard waarmee AI tools met elke externe dienst praten.</div>
+        <div class="body">
+          <div class="card-grid card-grid--2col">
+            <div class="card">
+              <h3>Wat is het?</h3>
+              <p>Open protocol (door Anthropic, <a href="https://modelcontextprotocol.io/">modelcontextprotocol.io</a>). AI tools praten met MCP servers voor data en acties.</p>
+            </div>
+            <div class="card">
+              <h3>Waarom?</h3>
+              <p>Geen custom integraties meer. Schrijf één MCP server, elk AI-tool kan het gebruiken.</p>
+            </div>
+            <div class="card">
+              <h3>Installeren</h3>
+              <p><code style="color: var(--orange)">claude mcp add</code> voor stdio, SSE of HTTP. Of <code>.mcp.json</code> in de repo, deelbaar met je team. <code style="color: var(--orange)">/mcp</code> beheert + authenticeert.</p>
+            </div>
+            <div class="card">
+              <h3>Relatie tot plugins</h3>
+              <p>Een plugin bundelt skills, hooks, slash commands én MCP-servers in één pakket (via <code style="color: var(--orange)">/plugin</code> + marketplaces). MCP = protocol, plugin = distributie.</p>
+            </div>
+            <div class="card">
+              <h3>Voor Claude Code</h3>
+              <p>Toegang tot Linear, GitHub, Sentry, Slack, als first-class context.</p>
+            </div>
+            <div class="card">
+              <h3>Zelf bouwen</h3>
+              <p>SDKs in TS en Python · kleine MCP server in een uur. Voor interne tools goud waard.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 44: MCP voorbeeld Linear -->
+      <section
+        class="slide slide--content"
+        data-index="44"
+        data-block="6"
+        data-block-title="Production Ready"
+      >
+        <h2><img src="images/logos/linear.svg" alt="" style="height: 30px; vertical-align: -6px; margin-right: 12px; opacity: 0.95;" />MCP voorbeeld · Linear</h2>
+        <div class="lead">Tickets en context, direct in je Claude-sessie.</div>
+        <div class="body">
+          <div class="terminal" style="font-size: 14px">
+            <div><span class="prompt">&gt;</span> Pak ticket HW-1234 en implementeer</div>
+            <br />
+            <div class="output">✻ [MCP: linear] Fetching HW-1234...</div>
+            <div class="output">&nbsp;&nbsp;Title: CSV export moet dynamic pricing meenemen</div>
+            <div class="output">&nbsp;&nbsp;Labels: backend, pricing</div>
+            <div class="output">&nbsp;&nbsp;Acceptance: enkel + dubbel + dynamisch tarief</div>
+            <br />
+            <div class="output">✻ Plan:</div>
+            <div class="output">&nbsp;&nbsp;1. Extend CSV exporter met pricingMode param</div>
+            <div class="output">&nbsp;&nbsp;2. Hook EPEX fetcher voor dynamisch tarief</div>
+            <div class="output">&nbsp;&nbsp;3. Tests per pricing mode</div>
+          </div>
+          <div style="margin-top: 16px; color: var(--muted); font-size: 15px; text-align: center">
+            Geen copy-paste meer tussen Linear en je editor.
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 45: MCP ecosystem -->
+      <section
+        class="slide slide--content"
+        data-index="45"
+        data-block="6"
+        data-block-title="Production Ready"
+      >
+        <h2>MCP ecosystem</h2>
+        <div class="lead">Welke servers zijn er al, en wanneer bouw je zelf?</div>
+        <div class="body">
+          <div class="card-grid card-grid--2col">
+            <div class="card">
+              <h3><img class="card-icon" src="images/logos/github.svg" alt="" /> GitHub</h3>
+              <p>PRs, issues, actions · official MCP server.</p>
+            </div>
+            <div class="card">
+              <h3><img class="card-icon" src="images/logos/linear.svg" alt="" /> Linear</h3>
+              <p>Tickets, projects, cycles · official.</p>
+            </div>
+            <div class="card">
+              <h3><img class="card-icon" src="images/logos/sentry.svg" alt="" /> Sentry</h3>
+              <p>Errors en stack traces · direct als context.</p>
+            </div>
+            <div class="card">
+              <h3><img class="card-icon" src="images/logos/postgresql.svg" alt="" /><img class="card-icon" src="images/logos/supabase.svg" alt="" /> Postgres / Supabase</h3>
+              <p>Query je DB · schema als context.</p>
+            </div>
+            <div class="card">
+              <h3><img class="card-icon" src="images/logos/raspberrypi.svg" alt="" /> Eigen · hardware?</h3>
+              <p>
+                Voor embedded: custom MCP die Renode output + sensor-data
+                terugkoppelt aan Claude.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Context7</h3>
+              <p>Recente library docs · vult training-data gat op.</p>
+            </div>
+          </div>
+          <div class="callout" style="margin-top: 20px">
+            Opdracht: voeg Context7 toe met <code style="color: var(--orange)">claude mcp add context7 -- npx -y @upstash/context7-mcp</code>, check met <code style="color: var(--orange)">/mcp</code> en vraag Claude naar de laatste Next.js 16 API.
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 46: CI/CD integratie -->
+      <section
+        class="slide slide--content"
+        data-index="46"
+        data-block="6"
+        data-block-title="Production Ready"
+      >
+        <h2>CI/CD &amp; headless mode</h2>
+        <div class="lead">Claude Code kan ook zonder mens draaien.</div>
+        <div class="body">
+          <div class="terminal" style="font-size: 14px">
+            <div><span class="prompt">$</span> claude -p "Review this PR. Focus on security."</div>
+            <div class="output">✻ Reviewing PR #234...</div>
+            <div class="output">✻ 2 blocking issues, 4 suggestions.</div>
+            <div class="output">✻ Posted as PR comment.</div>
+          </div>
+          <div style="margin-top: 20px">
+            <div class="card-grid">
+              <div class="card">
+                <h3>PR reviews</h3>
+                <p>GitHub Action die Claude laat meelezen op elke PR.</p>
+              </div>
+              <div class="card">
+                <h3>Bulk migrations</h3>
+                <p>Rename props in 200 components, structured output, deterministic.</p>
+              </div>
+              <div class="card">
+                <h3>Docs genereren</h3>
+                <p>Elke release notes auto-generated uit diff + commits.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 47: Auto mode · unattended runs -->
+      <section
+        class="slide slide--content"
+        data-index="47"
+        data-block="6"
+        data-block-title="Production Ready"
+      >
+        <h2>Auto mode · unattended runs</h2>
+        <div class="lead">
+          Voor langer-lopende of headless runs zonder per-tool approval prompts.
+        </div>
+        <div class="body">
+          <div class="card-grid card-grid--2col">
+            <div class="card">
+              <h3>Wat?</h3>
+              <p>Permission mode waar een classifier-model commands voor-checkt. Routine work loopt door, escalation/risky stuff wordt geblokt.</p>
+            </div>
+            <div class="card">
+              <h3>Wanneer?</h3>
+              <p>Lange migraties · CI runs · <code style="color: var(--orange)">/goal</code>-loops · bulk operations. Alles waar jij niet zit te klikken.</p>
+            </div>
+            <div class="card">
+              <h3>Hoe?</h3>
+              <p><code>claude --permission-mode auto -p "fix all lint errors"</code>, of in-session via <code style="color: var(--orange)">/permissions</code> → auto.</p>
+            </div>
+            <div class="card">
+              <h3>Veiligheid</h3>
+              <p>Aborteert in headless als de classifier herhaaldelijk blokt. Combineer met <code style="color: var(--orange)">/sandbox</code> (OS-isolatie) of <code>--allowedTools</code> voor scope.</p>
+            </div>
+          </div>
+          <div class="callout" style="margin-top: 20px">
+            Tip: niet voor security-kritiek werk. Wel voor saai-en-veel werk.
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 48: Team guidelines -->
+      <section
+        class="slide slide--content"
+        data-index="48"
+        data-block="6"
+        data-block-title="Production Ready"
+      >
+        <h2>Team afspraken</h2>
+        <div class="lead">Hoe voorkom je dat "met AI" chaos wordt.</div>
+        <div class="body">
+          <div class="card-grid card-grid--2col">
+            <div class="card">
+              <h3>Wanneer wel</h3>
+              <p>
+                Boilerplate · refactors · tests · docs · exploratie · code
+                review.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Wanneer niet</h3>
+              <p>
+                Kritieke systemen · weinig test coverage · veel code
+                complexiteit/dependencies.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Review cultuur</h3>
+              <p>
+                AI-gegenereerde code krijgt geen vrijstelling van review,
+                krijgt juist méér aandacht.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Monitoring</h3>
+              <p>
+                Anthropic Enterprise admin-console · per-user usage · budget
+                alerts.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SECTIE 7 · AFSLUITING & FAQ (3 slides)
+           ============================================================ -->
+
+      <!-- Slide 49: FAQ -->
+      <section class="slide slide--content" data-index="49">
+        <h2>FAQ</h2>
+        <div class="lead">Vragen die we vaak krijgen.</div>
+        <div class="body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>Wat is de beste workflow?</h3>
+              <p>Gaandeweg itereren naar wat het beste past. Community is ook nog "zoekende" · de tooling verschuift elk kwartaal, dus blijf experimenteren in plaats van vastklikken op één recept.</p>
+            </div>
+            <div class="card">
+              <h3>Wat met hallucinaties?</h3>
+              <p>80% komt uit gebrek aan context. Plan mode + review + CLAUDE.md.</p>
+            </div>
+            <div class="card">
+              <h3>Wat als Claude verdwijnt?</h3>
+              <p>Concepten (context engineering, plan-first) zijn overdraagbaar.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 50: Resources & next steps -->
+      <section class="slide slide--content" data-index="50">
+        <h2>Resources</h2>
+        <div class="lead">Waar verder te leren.</div>
+        <div class="body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>Docs</h3>
+              <p>
+                <code>claude.com/claude-code</code><br />
+                <code>docs.anthropic.com</code>
+              </p>
+            </div>
+            <div class="card">
+              <h3>Workshop repo</h3>
+              <p>De repo die jullie hebben gecloned bevat ook <code>presentation.html</code> · de slides van vandaag.</p>
+            </div>
+            <div class="card">
+              <h3>Skills inspiratie</h3>
+              <p><a href="https://github.com/multica-ai/andrej-karpathy-skills">Karpathy guidelines</a> · <a href="https://github.com/mattpocock/skills">mattpocock/skills</a> · <a href="https://agentskills.io">Agent Skills standaard</a></p>
+            </div>
+            <div class="card">
+              <h3>Community</h3>
+              <p>Anthropic Discord · r/ClaudeAI · Hacker News threads.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 51: Bedankt -->
+      <section class="slide slide--title" data-index="51">
+        <h1 style="font-size: 56px">Bedankt!</h1>
+        <div class="subtitle" style="margin-bottom: 18px">Vragen? Stuur me een berichtje.</div>
+        <div
+          style="
+            font-family: var(--font-mono);
+            color: var(--text);
+            font-size: 16px;
+            display: flex;
+            gap: 18px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+          "
+        >
+          <span>Coen Stevens</span>
+          <span style="color: var(--dim)">·</span>
+          <a href="mailto:coen@codehive.nl" style="color: var(--accent); text-decoration: none">coen@codehive.nl</a>
+          <span style="color: var(--dim)">·</span>
+          <a href="https://www.linkedin.com/in/coenstevens/" style="color: var(--accent); text-decoration: none">linkedin.com/in/coenstevens</a>
+        </div>
+        <div
+          style="
+            display: flex;
+            gap: 40px;
+            align-items: center;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+          "
+        >
+          <div class="card card--stacked" style="flex: 1; min-width: 220px; text-align: left">
+            <div style="height: 32px; display: flex; align-items: center; margin-bottom: 10px">
+              <img
+                src="images/codehive_Logo%20codehive.svg"
+                alt="Codehive"
+                style="height: 32px"
+              />
+            </div>
+            <p style="font-size: 14px; color: var(--muted)">
+              Schaalbare AI- &amp;<br> software oplossingen
+            </p>
+            <p
+              style="
+                font-family: var(--font-mono);
+                font-size: 14px;
+                margin-top: 6px;
+              "
+            >
+              <a href="https://codehive.nl" style="color: var(--accent); text-decoration: none">codehive.nl</a>
+            </p>
+          </div>
+          <div class="card card--stacked" style="flex: 1; min-width: 220px; text-align: left">
+            <div style="height: 32px; display: flex; align-items: center; gap: 10px; margin-bottom: 10px">
+              <img
+                src="images/stevens-logo.png"
+                alt="stevens.dev"
+                style="height: 32px"
+              />
+              <span style="font-size: 20px; color: var(--text-strong); font-weight: 600">
+                stevens.dev
+              </span>
+            </div>
+            <p style="font-size: 14px; color: var(--muted)">
+              Persoonlijke portfolio.<br>  CTO &amp; AI engineer
+            </p>
+            <p
+              style="
+                font-family: var(--font-mono);
+                font-size: 14px;
+                margin-top: 6px;
+              "
+            >
+              <a href="https://stevens.dev" style="color: var(--accent); text-decoration: none">stevens.dev</a>
+            </p>
+          </div>
+          <div class="card card--stacked" style="flex: 1; min-width: 220px; text-align: left">
+            <div style="height: 32px; display: flex; align-items: center; margin-bottom: 10px">
+              <img
+                src="images/klime.svg"
+                alt="Klime"
+                style="height: 32px"
+              />
+            </div>
+            <p style="font-size: 14px; color: var(--muted)">
+              Staff engineer.<br> Customer Success AI.
+            </p>
+            <p
+              style="
+                font-family: var(--font-mono);
+                font-size: 14px;
+                margin-top: 6px;
+              "
+            >
+              <a href="https://klime.com" style="color: var(--accent); text-decoration: none">klime.com</a>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 52: AI + fysieke hardware (bonus, embedded team) -->
+      <section class="slide slide--content" data-index="52">
+        <h2>Bonus · AI + fysieke hardware</h2>
+        <div class="body">
+          <div class="card-grid">
+            <div class="card">
+              <h3>Wat Claude wél kan voor embedded</h3>
+              <ul class="checks">
+                <li>Firmware schrijven · C/C++/Rust</li>
+                <li>Unit tests · draaien lokaal zonder HW</li>
+                <li>HAL opzetten · meer code testbaar</li>
+                <li>Protocol-implementaties · P1, Zigbee</li>
+                <li>Datasheets als context · via CLAUDE.md</li>
+              </ul>
+            </div>
+            <div class="card" style="border-color: var(--accent)">
+              <h3 style="color: var(--accent)"><img class="card-icon" src="images/logos/renode.svg" alt="" style="height: 24px; vertical-align: -7px; margin-right: 12px" /> Renode · firmware emulator</h3>
+              <div>
+                <p style="font-size: 15px; line-height: 1.6; margin-bottom: 8px">
+                  Open source SoC emulator (Antmicro, MIT,
+                  <a href="https://renode.io/">renode.io</a>). Draait unchanged
+                  firmware binaries op virtuele boards met peripherals &amp;
+                  sensors.
+                </p>
+                <ul class="checks">
+                  <li>Deterministic time flow · stoppen, inspecteren, delen</li>
+                  <li>CI zonder test rigs</li>
+                  <li>macOS native ARM64 (mei 2025)</li>
+                  <li><img class="card-icon" src="images/logos/raspberrypi.svg" alt="" style="height: 16px; vertical-align: -3px; margin-right: 4px" />RP2040 community support</li>
+                </ul>
+                <div
+                  style="
+                    margin-top: 10px;
+                    font-family: var(--font-mono);
+                    font-size: 13px;
+                    color: var(--muted);
+                  "
+                >
+                  CLAUDE.md + Renode = AI dev-loop zonder hardware
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Persistent chrome -->
+    <div class="chrome-bottom">
+      <div class="brand">
+        <img
+          src="images/codehive_Logo%20codehive.svg"
+          alt="Codehive"
+          class="brand-logo"
+        />
+      </div>
+      <span class="block-label" id="block-label"></span>
+      <span class="slide-counter" id="slide-counter">[1 / 51]</span>
+    </div>
+
+    <div class="help-hint">→ / space · volgende   ←  vorige   home/end · eerste/laatste</div>
+
+    <script>
+      (() => {
+        const deck = document.getElementById("deck");
+        const slides = Array.from(deck.querySelectorAll(".slide"));
+        const counter = document.getElementById("slide-counter");
+        const blockLabel = document.getElementById("block-label");
+        const total = slides.length;
+        let current = 0;
+
+        function render() {
+          slides.forEach((s, i) => s.classList.toggle("active", i === current));
+          counter.textContent = `[${current + 1} / ${total}]`;
+          const slide = slides[current];
+          const block = slide.dataset.block;
+          const title = slide.dataset.blockTitle;
+          if (block && title) {
+            blockLabel.textContent = `Blok ${block} · ${title}`;
+            blockLabel.style.visibility = "visible";
+          } else {
+            blockLabel.style.visibility = "hidden";
+          }
+          history.replaceState(null, "", `#${current + 1}`);
+        }
+
+        function go(delta) {
+          const next = Math.max(0, Math.min(total - 1, current + delta));
+          if (next === current) return;
+          current = next;
+          render();
+        }
+
+        function goTo(index) {
+          if (index < 0 || index >= total) return;
+          current = index;
+          render();
+        }
+
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+            e.preventDefault();
+            go(1);
+          } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+            e.preventDefault();
+            go(-1);
+          } else if (e.key === "Home") {
+            e.preventDefault();
+            goTo(0);
+          } else if (e.key === "End") {
+            e.preventDefault();
+            goTo(total - 1);
+          }
+        });
+
+        // Deep link via hash
+        function parseHashIndex() {
+          const n = parseInt(location.hash.slice(1), 10);
+          if (isNaN(n) || n < 1 || n > total) return 0;
+          return n - 1;
+        }
+
+        window.addEventListener("hashchange", () => {
+          goTo(parseHashIndex());
+        });
+
+        current = parseHashIndex();
+        render();
+      })();
+    </script>
+  </body>
+</html>
