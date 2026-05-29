@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient } from "@prisma/client";
+import { auth } from "../src/lib/auth";
 
 const adapter = new PrismaBetterSqlite3({ url: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -10,16 +11,26 @@ async function main() {
 
   await prisma.meterReading.deleteMany();
   await prisma.product.deleteMany();
+  await prisma.session.deleteMany();
+  await prisma.account.deleteMany();
   await prisma.user.deleteMany();
 
-  const user = await prisma.user.create({
-    data: {
+  const signUpResponse = await auth.api.signUpEmail({
+    body: {
       email: "demo@homewizard.local",
       name: "Demo User",
-      emailVerified: true,
+      password: "workshop123",
     },
+    asResponse: true,
   });
-  console.log(`  Created user: ${user.email}`);
+  if (!signUpResponse.ok) {
+    throw new Error(`signUpEmail failed: ${signUpResponse.status} ${signUpResponse.statusText}`);
+  }
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { email: "demo@homewizard.local" },
+  });
+  await prisma.user.update({ where: { email: "demo@homewizard.local" }, data: { emailVerified: true } });
+  console.log(`  Created user: ${user.email} (password: workshop123)`);
 
   // Realistic cumulative smart-meter values: electricity in kWh, gas/water in m3.
   // Spread across 7 days, monotonically increasing (matches P1 telegram output).

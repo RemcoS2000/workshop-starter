@@ -55,8 +55,8 @@ Where everything lives, for anyone new to Next.js:
 - `prisma/seed.ts` · demo data script
 - `prisma.config.ts` · Prisma 7 CLI config (datasource URL, seed command)
 - `sample-data/meter-readings.csv` · input for the CSV upload exercise
-- `CLAUDE.md` · context Claude Code reads every session (stack, scripts, conventions)
-- `.claude/settings.json` · pre-approved commands so you do not get interrupted
+- `CLAUDE.md` · compact session context with only repo-specific facts and sharp edges
+- `.claude/settings.json` · pre-approved commands for the common workshop and git flows
 - `.claude/skills/{gc,gcp,pr,grill-me}/SKILL.md` · git skills (commit, commit+push, open PR) + plan stress-test via interview (source: [mattpocock/skills](https://github.com/mattpocock/skills))
 - `package.json` · scripts and dependencies
 
@@ -82,7 +82,7 @@ Where everything lives, for anyone new to Next.js:
 
 Plus four Claude Code skills in [.claude/skills/](.claude/skills/):
 
-- `/gc` · stage and commit with an auto-generated Conventional Commits message
+- `/gc` · stage intended files only, then commit with an auto-generated Conventional Commits message
 - `/gcp` · `/gc` plus push to remote
 - `/pr` · open a pull request with title + body derived from the diff
 - `/grill-me` · interview-style stress-test of a plan until shared understanding ([source](https://github.com/mattpocock/skills/blob/main/skills/productivity/grill-me/SKILL.md))
