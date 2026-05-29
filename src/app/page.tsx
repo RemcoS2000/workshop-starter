@@ -11,13 +11,13 @@ const PAD_B  = 32;
 const PLOT_W = SVG_W - PAD_L - PAD_R; // 776
 const PLOT_H = SVG_H - PAD_T - PAD_B; // 232
 
-const KIND_COLOR: Record<string, string> = {
+const KIND_ORDER = ["electricity", "gas", "water"] as const;
+
+const KIND_COLOR: Record<(typeof KIND_ORDER)[number], string> = {
   electricity: "#3b82f6",
   gas:         "#f97316",
   water:       "#14b8a6",
 };
-
-const KIND_ORDER = ["electricity", "gas", "water"] as const;
 
 type ChartPoint = { readAt: Date; kind: string; value: number };
 
@@ -69,9 +69,13 @@ function MeterChart({ readings }: { readings: ChartPoint[] }) {
     byKind.get(r.kind)!.push(r);
   }
 
-  const allTimes  = readings.map((r) => r.readAt.getTime());
-  const minTime   = allTimes.reduce((a, b) => (a < b ? a : b), Infinity);
-  const maxTime   = allTimes.reduce((a, b) => (a > b ? a : b), -Infinity);
+  let minTime = Infinity;
+  let maxTime = -Infinity;
+  for (const r of readings) {
+    const t = r.readAt.getTime();
+    if (t < minTime) minTime = t;
+    if (t > maxTime) maxTime = t;
+  }
   const timeRange = maxTime - minTime;
 
   const series = KIND_ORDER.flatMap((kind) => {
@@ -84,11 +88,13 @@ function MeterChart({ readings }: { readings: ChartPoint[] }) {
     return [
       {
         kind,
-        color:  KIND_COLOR[kind] ?? "#6b7280",
+        color:  KIND_COLOR[kind],
         points: toPoints(pts, minTime, timeRange, minVal, valRange),
       },
     ];
   });
+
+  if (series.length === 0) return null;
 
   const ticks = xAxisTicks(minTime, maxTime, 5);
 
@@ -100,6 +106,7 @@ function MeterChart({ readings }: { readings: ChartPoint[] }) {
         aria-label="Meter readings over time"
         role="img"
       >
+        <title>Meter readings over time</title>
         <line
           x1={PAD_L} y1={PAD_T + PLOT_H}
           x2={PAD_L + PLOT_W} y2={PAD_T + PLOT_H}
