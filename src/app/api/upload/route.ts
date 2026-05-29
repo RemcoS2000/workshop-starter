@@ -12,10 +12,10 @@ const RowSchema = z.object({
     .min(1, "Value is required")
     .transform((v) => {
       const n = Number(v);
-      if (isNaN(n)) throw new Error("Invalid number");
+      if (!isFinite(n)) throw new Error("Invalid number");
       return n;
     }),
-  unit: z.string().min(1),
+  unit: z.enum(["kWh", "m3"]),
 });
 
 type ParsedRow = z.infer<typeof RowSchema>;
