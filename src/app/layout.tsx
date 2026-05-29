@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Claude Code workshop starter",
-  description: "Next.js + Prisma + SQLite starter for the HomeWizard workshop",
+  title: "HomeWizard Workshop",
+  description: "HomeWizard energy monitoring workshop",
 };
 
 export default function RootLayout({

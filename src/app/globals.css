@@ -3,6 +3,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --hw-navy: #0a2540;
+  --hw-cyan: #00d4e8;
 }
 
 @theme inline {
