@@ -21,8 +21,7 @@ export default async function Shop() {
             Shop
           </h1>
           <p className="mt-2 text-zinc-600 dark:text-zinc-400">
-            Seeded HomeWizard-style catalog. Styling is intentionally neutral -
-            make it yours.
+            Seeded HomeWizard-style catalog.
           </p>
         </div>
         <Link
@@ -37,16 +36,22 @@ export default async function Shop() {
         {products.map((p) => (
           <li
             key={p.id}
-            className="flex flex-col rounded-lg border border-zinc-200 p-5 dark:border-zinc-800"
+            className="flex flex-col rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
           >
-            <div className="mb-1 text-xs uppercase tracking-wide text-zinc-500">
+            <div
+              className="mb-2 self-start rounded-full border px-2 py-0.5 text-xs font-medium uppercase tracking-wide"
+              style={{ color: "var(--hw-navy)", borderColor: "var(--hw-navy)" }}
+            >
               {p.category}
             </div>
-            <h2 className="text-lg font-semibold">{p.name}</h2>
+            <h2 className="text-xl font-bold">{p.name}</h2>
             <p className="mt-2 flex-1 text-sm text-zinc-600 dark:text-zinc-400">
               {p.description}
             </p>
-            <div className="mt-4 font-mono text-base">
+            <div
+              className="mt-4 font-mono text-base font-semibold"
+              style={{ color: "var(--hw-cyan)" }}
+            >
               {formatPrice(p.priceCents)}
             </div>
           </li>
