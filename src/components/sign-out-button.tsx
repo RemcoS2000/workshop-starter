@@ -7,6 +7,8 @@ export function SignOutButton() {
   const router = useRouter();
   return (
     <button
+      type="button"
+      className="cursor-pointer transition-colors hover:text-[var(--hw-cyan)] focus-visible:outline-none focus-visible:underline"
       onClick={async () => {
         const { error } = await signOut();
         if (error) {

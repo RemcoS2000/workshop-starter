@@ -11,14 +11,14 @@ export async function SiteHeader() {
     >
       <Link
         href="/"
-        className="font-semibold text-white transition-colors hover:text-[#00d4e8]"
+        className="font-semibold text-white transition-colors hover:text-[var(--hw-cyan)]"
       >
         HomeWizard
       </Link>
       <nav className="flex items-center gap-4 text-sm text-white">
         <Link
           href="/shop"
-          className="transition-colors hover:text-[#00d4e8]"
+          className="transition-colors hover:text-[var(--hw-cyan)]"
         >
           Shop
         </Link>
@@ -32,7 +32,7 @@ export async function SiteHeader() {
         ) : (
           <Link
             href="/login"
-            className="transition-colors hover:text-[#00d4e8]"
+            className="transition-colors hover:text-[var(--hw-cyan)]"
           >
             Sign in
           </Link>

@@ -38,20 +38,14 @@ export default async function Shop() {
             key={p.id}
             className="flex flex-col rounded-xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
           >
-            <div
-              className="mb-2 self-start rounded-full border px-2 py-0.5 text-xs font-medium uppercase tracking-wide"
-              style={{ color: "var(--hw-navy)", borderColor: "var(--hw-navy)" }}
-            >
+            <div className="mb-2 self-start rounded-full border border-[#0a2540] px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-[#0a2540] dark:border-[#00d4e8] dark:text-[#00d4e8]">
               {p.category}
             </div>
             <h2 className="text-xl font-bold">{p.name}</h2>
             <p className="mt-2 flex-1 text-sm text-zinc-600 dark:text-zinc-400">
               {p.description}
             </p>
-            <div
-              className="mt-4 font-mono text-base font-semibold"
-              style={{ color: "var(--hw-cyan)" }}
-            >
+            <div className="mt-4 font-mono text-base font-semibold text-[#007a87] dark:text-[#00d4e8]">
               {formatPrice(p.priceCents)}
             </div>
           </li>
