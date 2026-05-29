@@ -21,14 +21,20 @@ export default async function Home() {
           </code>{" "}
           for the project tour and Blok 4 tasks.
         </p>
-        <p className="mt-2">
+        <div className="mt-2 flex gap-4">
           <Link
             href="/shop"
             className="text-sm font-medium underline underline-offset-4"
           >
             View the shop &rarr;
           </Link>
-        </p>
+          <Link
+            href="/upload"
+            className="text-sm font-medium underline underline-offset-4"
+          >
+            Upload readings &rarr;
+          </Link>
+        </div>
       </header>
 
       <section>
