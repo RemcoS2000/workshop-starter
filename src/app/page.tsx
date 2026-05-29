@@ -169,7 +169,7 @@ export default async function Home() {
     prisma.meterReading.findMany({
       orderBy: { readAt: "desc" },
       take: 10,
-      include: { user: { select: { name: true, email: true } } },
+      include: { user: { select: { name: true } } },
     }),
   ]);
 
@@ -238,7 +238,7 @@ export default async function Home() {
                   <td className="px-4 py-2 font-mono text-xs text-zinc-600 dark:text-zinc-400">
                     {r.readAt.toISOString()}
                   </td>
-                  <td className="px-4 py-2">{r.user.name ?? r.user.email}</td>
+                  <td className="px-4 py-2">{r.user.name ?? "Anonymous"}</td>
                 </tr>
               ))}
             </tbody>
