@@ -1,10 +1,15 @@
 import fs from "node:fs";
+import crypto from "node:crypto";
 import { execSync } from "node:child_process";
 
 const run = (cmd) => execSync(cmd, { stdio: "inherit" });
 
 if (!fs.existsSync(".env")) {
-  fs.copyFileSync(".env.example", ".env");
+  const secret = crypto.randomBytes(32).toString("base64");
+  const contents = fs
+    .readFileSync(".env.example", "utf8")
+    .replace(/^(BETTER_AUTH_SECRET=).*$/m, `$1"${secret}"`);
+  fs.writeFileSync(".env", contents);
   console.log("Created .env from .env.example");
 }
 
